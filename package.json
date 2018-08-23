@@ -12,6 +12,7 @@
     "cors": "^2.8.1",
     "dotenv": "^4.0.0",
     "express": "^4.12.3",
+    "lodash": "^4.17.10",
     "path": "^0.12.7",
     "swagger-express-mw": "^0.6.0",
     "swagger-parser": "^3.4.1",
@@ -23,6 +24,10 @@
   },
   "scripts": {
     "start": "node app.js",
-    "test": "swagger project test"
+    "test": "swagger project test",
+    "build:browserify": "browserify main.js -o ./public/js/bundle.js"
   }
 }
+
+
+
