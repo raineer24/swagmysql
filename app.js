@@ -1,65 +1,30 @@
-const config = require('./config/config');
-const express = require('express');
-var SwaggerExpress = require('swagger-express-mw');
-const app = express();
+const express = require('express')
+const app = express()
+const path = require('path');
 const log = require('color-logs')(true, true, __filename);
 
-const apiSubPath = express();
-
-const cors = require('cors');
+const config = require('./config/config');
 
 const SwaggerParser = require('swagger-parser');
+const SwaggerExpress = require('swagger-express-mw');
+const SwaggerUi = require('swagger-tools/middleware/swagger-ui');
 
-const { authenticate } = require('./middleware/authenticate').authenticate;
-const { authorize } = require('./middleware/authorize').authorize;
 
-// Validate swagger definition
-SwaggerParser.validate(config.swaggerFile)
-  .then((result) => {
-    log.info('Validation OK', result.info);
-  })
-  .catch((err) => {
-    log.info('Swagger Error:', err);
-  });
 
-// Initialise swagger definition
-SwaggerParser.bundle(config.swaggerFile)
-  .then((api) => {
-    const swaggerConfig = {
-      appRoot: __dirname,
-      swagger: api,
-      swaggerSecurityHandlers: {
-        userSecurity: authenticate,
-        roles: authorize,
-      },
-    };
+app.use(express.static(path.join(__dirname, 'public')));
 
-SwaggerExpress.create(config, function(err, swaggerExpress) {
-  if (err) { throw err; }
-
-  app.use(cors({
-    origin: '*',
-    exposedHeaders: ['Content-Range', 'X-Content-Range', 'Content-Disposition', 'Content-Error'],
-    credentials: true,
-  }));
-  app.use(SwaggerUi(swaggerExpress.runner.swagger));
-  app.use(express.static(path.join(__dirname, 'public')));
-
-  apiSubPath.use((req, res, next) => {
-    res.setHeader('X-Powered-By', 'EOS');
-    next();
-  });
-  apiSubPath.get('/v1/swagger.json', (req, res) => {
-    res.json(api);
-  });
-  // install middleware
-  swaggerExpress.register(apiSubPath);
-
-  app.use(apiSubPath);
-  app.listen(config.env.port);
-
-  if (swaggerExpress.runner.swagger.paths['/hello']) {
-    console.log('try this:\ncurl http://127.0.0.1:' + port + '/hello?name=Scott');
-  }
+app.get('/css/app.css', function (req, res) {
+    res.sendFile(path.join(__dirname + '/css/app.css'));
 });
-  });
+
+app.get('/js/script.js', function (req, res) {
+    res.sendFile(path.join(__dirname + '/js/script.js'));
+});
+
+app.get('/', function (req, res) {
+    res.sendFile(path.join(__dirname + '/index.html'));
+});
+
+
+
+app.listen(3000, () => console.log('Example app listening on port 3000!'))
